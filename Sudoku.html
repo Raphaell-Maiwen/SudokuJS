@@ -1,0 +1,37 @@
+<html>
+	<body>
+		<input id = "toSolve">
+		<script>
+			var gridToSolve = document.querySelector("#toSolve");
+			gridToSolve.addEventListener("keyPress", saveGrid);
+			var grids = [];
+			var rows = [[], [], [], [], [], [], [], [], []];
+			var columns = [];
+
+			function saveGrid(e){
+				if(e.keyCode == 13){
+					var grid = gridToSolve.value;
+					gridToSolve.value = "";
+
+					for(var k = 0; k < grid.length; i++){
+						for(var i = 0; i < 9; i++){
+							for(var j = 0; j < 9; j++){
+								rows[i][j] = parseInt(grid.charAt(k));
+							}
+						}
+					}
+
+					main();
+				}
+			}
+
+			function main(){
+				for(var i = 0; i < 9; i++){
+					for(var j = 0; j < 9; j++)
+					document.write(rows[i][j] + " ");
+				}
+			}
+
+		</script>
+	</body>
+</html>
