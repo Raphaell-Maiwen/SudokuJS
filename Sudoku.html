@@ -3,21 +3,39 @@
 		<input id = "toSolve">
 		<script>
 			var gridToSolve = document.querySelector("#toSolve");
-			gridToSolve.addEventListener("keyPress", saveGrid);
-			var grids = [];
+			gridToSolve.addEventListener("keypress", saveGrid);
+			var grids = [[], [], [], [], [], [], [], [], []];
 			var rows = [[], [], [], [], [], [], [], [], []];
-			var columns = [];
+			var columns = [[], [], [], [], [], [], [], [], []];
+			var newNumber = true;
 
 			function saveGrid(e){
 				if(e.keyCode == 13){
 					var grid = gridToSolve.value;
 					gridToSolve.value = "";
 
-					for(var k = 0; k < grid.length; i++){
-						for(var i = 0; i < 9; i++){
-							for(var j = 0; j < 9; j++){
-								rows[i][j] = parseInt(grid.charAt(k));
-							}
+
+					//Store the input in rows
+					for(var i = 0; i < 9; i++){
+						for(var j = 0; j < 9; j++){
+							rows[i][j] = parseInt(grid.charAt(i*9+j));
+						}
+					}
+
+					//Store the input in columns
+					for(var i = 0; i < 9; i++){
+						for(var j = 0; j < 9; j++){
+							columns[j][i] = rows[i][j];
+						}
+					}
+
+					//Store the input in 9*9 grids
+					//So smart. How?
+					for(var i = 0; i < 9; i++){	
+						for(var j = 0; j < 3; j++){
+							grids[i][3*j] = rows[parseInt((i/3))* 3 + j][(i%3) * 3];
+							grids[i][3*j +1] = rows[parseInt((i/3)) * 3 + j][(i%3) * 3 +1];
+							grids[i][3*j +2] = rows[parseInt((i/3)) * 3 + j][(i%3) * 3 +2];
 						}
 					}
 
@@ -26,11 +44,119 @@
 			}
 
 			function main(){
+				//Put them all in a bigger while, so that when each step is completed, it starts again
+				//Verification by grid
+				while(newNumber){
+					newNumber = false;
+					for(var grid = 0; grid < 9; grid++){
+						for(var i = 1; i <= 9; i++){
+							var found = false;
+							for(var j = 0; j < 9; j++){
+								//Verifying if the current case is between 1 and 9 (so is discovered)
+								if(grids[grid][j] == i){
+									found = true;
+									break;
+								}
+							}
+							if(!found){
+								gridSearch(grid,i);
+							}
+						}
+					}
+				}
+
+				newNumber = true;
+
+				while(newNumber){
+					newNumber = false;
+				}
+
+				while(newNumber){
+					newNumber = false;
+				}
+
 				for(var i = 0; i < 9; i++){
-					for(var j = 0; j < 9; j++)
-					document.write(rows[i][j] + " ");
+					for(var j = 0; j < 9; j++){
+						document.write(rows[i][j]);
+					}
+					document.write("\n");
 				}
 			}
+
+			function gridSearch(grid, number){
+				var cases = [false, false, false, false, false, false, false, false, false];
+				for(var i = 0; i < 9; i++){
+					if(grids[grid][i] != 0){
+						cases[i] = true;
+					}
+					else{
+						cases[i] = false;
+					}
+				}
+
+				//First, verification by rows
+				var start = 0;
+				if(grid > 5){
+					start = 6;
+				}
+				else if (grid > 2){
+					start = 3;
+				}
+
+				for(var i = start; i < start+3; i++){
+					for(var j = 0; j < 9; j++){
+						if(rows[i][j] == number){
+							cases[(i % 3) * 3] = true;
+							cases[(i % 3) * 3 +1] = true;
+							cases[(i % 3) * 3 +2] = true;
+							break;
+						}
+					}
+				}
+
+				//Second, verification by columns
+				start = 0;
+				if(grid % 3 == 2){
+					start = 6;
+				}
+				else if(grid % 3 == 1){
+					start = 3;
+				}
+
+				for(var i = start; i < start+3; i++){
+					for(var j = 0; j < 9; j++){
+						if(columns[i][j] == number){
+							cases[i % 3] = true;
+							cases[i % 3 +3] = true;
+							cases[i % 3 +6] = true;
+							break;
+						}
+					}
+				}
+
+				var zeros = 0;
+				var index;
+				for(var i = 0; i < 9; i++){
+					if(cases[i] == false){
+						zeros++;
+						index = i;
+					}
+					//Little optimization!
+					if(zeros >=2){
+						return;
+					}
+					
+				}
+
+				grids[grid][index] = number;
+				rows[parseInt(grid / 3) * 3 + parseInt(index/3)][grid % 3 * 3 + index%3] = number;
+				columns[grid % 3 * 3 + index%3][parseInt(grid/3) * 3 + parseInt(index/3)] = number;
+
+				newNumber = true;
+				//tempBool = true;
+			}
+
+			//function 
 
 		</script>
 	</body>
