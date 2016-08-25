@@ -32,7 +32,6 @@
 					}
 
 					//Store the input in 9*9 grids
-					//So smart. How?
 					for(var i = 0; i < 9; i++){	
 						for(var j = 0; j < 3; j++){
 							grids[i][3*j] = rows[parseInt((i/3))* 3 + j][(i%3) * 3];
@@ -48,52 +47,99 @@
 			function main(){
 				//Put them all in a bigger while, so that when each step is completed, it starts again
 				//Verification by grid
-				var taMere = 0;
-				var tonPere = 0;
 				while(fromTheStart){
 					fromTheStart = false;
-					taMere++;
 					while(newNumber){
 						newNumber = false;
-						tonPere++;
 						for(var grid = 0; grid < 9; grid++){
 							for(var i = 1; i <= 9; i++){
-								var foundG = false;
-								var foundC = false;
-								var foundR = false;
-								var index;
+								var found = false;
 								for(var j = 0; j < 9; j++){
 									//Verifying if the current case is between 1 and 9 (so is discovered)
 									if(grids[grid][j] == i){
-										foundG = true;
-									}
-									if(rows[grid][j] == i){
-										foundR = true;
-									}
-									if(columns[grid][j] == i){
-										foundC = true;
+										found = true;
+										break;
 									}
 								}
-
-								if(!foundG){
+								if(!found){
 									gridSearch(grid,i);
 								}
-								if(!foundC){
-									columnSearch(grid,i);
+							}
+						}
+					}
+
+					newNumber = true;
+
+					//Verification by row
+					while(newNumber){
+						newNumber = false;
+						for(var row = 0; row < 9; row++){
+							for(var i = 1; i <= 9; i++){
+								var found = false;
+								for(var j = 0; j < 9; j++){
+									//Verifying if the current case is between 1 and 9 (so is discovered)
+									if(rows[row][j] == i){
+										found = true;
+										break;
+									}
 								}
-								if(!foundR){
-									rowSearch(grid,i);
+								if(!found){
+									rowSearch(row,i);
 								}
 							}
-							gridMemSearch(grid);
-							columnMemSearch(grid);
-							rowMemSearch(grid);
 						}
+					}
 
-						//rowSearch(parseInt(grid / 3) * 3 + parseInt(i/3), grid % 3 * 3 + i%3);
-						//columnSearch(grid % 3 * 3 + i%3, parseInt(grid/3) * 3 + parseInt(i/3));
+					//Verification by column
+					while(newNumber){
+						newNumber = false;
+						for(var column = 0; column < 9; column++){
+							for(var i = 1; i <= 9; i++){
+								var found = false;
+								for(var j = 0; j < 9; j++){
+									//Verifying if the current case is between 1 and 9 (so is discovered)
+									if(columns[column][j] == i){
+										found = true;
+										break;
+									}
+								}
+								if(!found){
+									columnSearch(column,i);
+								}
+							}
+						}
+					}
+
+					newNumber = true;
+
+					//Verification with memory on grids
+					while(newNumber){
+						newNumber = false;
+						for(var grid = 0; grid < 9; grid++){
+							gridMemSearch(grid);
+						}
+					}
+
+					newNumber = true;
+
+					while(newNumber){
+						newNumber = false;
+						for(var row = 0; row < 9; row++){
+							rowMemSearch(row);
+						}
+					}
+
+					newNumber = true;
+
+					while(newNumber){
+						newNumber = false;
+						for(var column = 0; column < 9; column++){
+							columnMemSearch(column);
+						}
 					}
 				}
+
+
 				//Display the solved grid
 				var sGrid = "";
 				for(var i = 0; i < 9; i++){
@@ -104,7 +150,6 @@
 				}
 
 				document.write(sGrid);
-				console.log("Ta mere " + taMere + "Ton pere" + tonPere);
 			}
 
 			function gridSearch(grid, number){
@@ -486,6 +531,7 @@
 			}
 
 			function fillCaseOne(grc, index, number, type){
+				console.log(number);
 				if(index != -1){
 					if(type == "g"){
 						grids[grc][index] = number;
