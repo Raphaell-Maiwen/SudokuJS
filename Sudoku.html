@@ -48,96 +48,52 @@
 			function main(){
 				//Put them all in a bigger while, so that when each step is completed, it starts again
 				//Verification by grid
+				var taMere = 0;
+				var tonPere = 0;
 				while(fromTheStart){
 					fromTheStart = false;
+					taMere++;
 					while(newNumber){
 						newNumber = false;
+						tonPere++;
 						for(var grid = 0; grid < 9; grid++){
 							for(var i = 1; i <= 9; i++){
-								var found = false;
+								var foundG = false;
+								var foundC = false;
+								var foundR = false;
+								var index;
 								for(var j = 0; j < 9; j++){
 									//Verifying if the current case is between 1 and 9 (so is discovered)
 									if(grids[grid][j] == i){
-										found = true;
-										break;
+										foundG = true;
+									}
+									if(rows[grid][j] == i){
+										foundR = true;
+									}
+									if(columns[grid][j] == i){
+										foundC = true;
 									}
 								}
-								if(!found){
+
+								if(!foundG){
 									gridSearch(grid,i);
 								}
-							}
-						}
-					}
-
-					newNumber = true;
-
-					//Verification by row
-					while(newNumber){
-						newNumber = false;
-						for(var row = 0; row < 9; row++){
-							for(var i = 1; i <= 9; i++){
-								var found = false;
-								for(var j = 0; j < 9; j++){
-									//Verifying if the current case is between 1 and 9 (so is discovered)
-									if(rows[row][j] == i){
-										found = true;
-										break;
-									}
+								if(!foundC){
+									columnSearch(grid,i);
 								}
-								if(!found){
-									rowSearch(row,i);
+								if(!foundR){
+									rowSearch(grid,i);
 								}
 							}
-						}
-					}
-
-					//Verification by column
-					while(newNumber){
-						newNumber = false;
-						for(var column = 0; column < 9; column++){
-							for(var i = 1; i <= 9; i++){
-								var found = false;
-								for(var j = 0; j < 9; j++){
-									//Verifying if the current case is between 1 and 9 (so is discovered)
-									if(columns[column][j] == i){
-										found = true;
-										break;
-									}
-								}
-								if(!found){
-									columnSearch(column,i);
-								}
-							}
-						}
-					}
-
-					newNumber = true;
-
-					//Verification with memory on grids
-					while(newNumber){
-						newNumber = false;
-						for(var grid = 0; grid < 9; grid++){
 							gridMemSearch(grid);
+							columnMemSearch(grid);
+							rowMemSearch(grid);
 						}
-					}
 
-					while(newNumber){
-						newNumber = false;
-						for(var row = 0; row < 9; row++){
-							rowMemSearch(row);
-						}
-					}
-
-					while(newNumber){
-						newNumber = false;
-						for(var column = 0; column < 9; column++){
-							//columnMemSearch(column);
-						}
+						//rowSearch(parseInt(grid / 3) * 3 + parseInt(i/3), grid % 3 * 3 + i%3);
+						//columnSearch(grid % 3 * 3 + i%3, parseInt(grid/3) * 3 + parseInt(i/3));
 					}
 				}
-
-				
-
 				//Display the solved grid
 				var sGrid = "";
 				for(var i = 0; i < 9; i++){
@@ -148,6 +104,7 @@
 				}
 
 				document.write(sGrid);
+				console.log("Ta mere " + taMere + "Ton pere" + tonPere);
 			}
 
 			function gridSearch(grid, number){
@@ -162,65 +119,13 @@
 				}
 
 				//First, verification by rows
-				var start = 0;
-				if(grid > 5){
-					start = 6;
-				}
-				else if (grid > 2){
-					start = 3;
-				}
-
-				for(var i = start; i < start+3; i++){
-					for(var j = 0; j < 9; j++){
-						if(rows[i][j] == number){
-							cases[(i % 3) * 3] = true;
-							cases[(i % 3) * 3 +1] = true;
-							cases[(i % 3) * 3 +2] = true;
-							break;
-						}
-					}
-				}
+				cases = rowVerification(grid, number, cases);
 
 				//Second, verification by columns
-				start = 0;
-				if(grid % 3 == 2){
-					start = 6;
-				}
-				else if(grid % 3 == 1){
-					start = 3;
-				}
+				cases = columnVerification(grid, number, cases);
 
-				for(var i = start; i < start+3; i++){
-					for(var j = 0; j < 9; j++){
-						if(columns[i][j] == number){
-							cases[i % 3] = true;
-							cases[i % 3 +3] = true;
-							cases[i % 3 +6] = true;
-							break;
-						}
-					}
-				}
-
-				var zeros = 0;
-				var index;
-				for(var i = 0; i < 9; i++){
-					if(cases[i] == false){
-						zeros++;
-						index = i;
-					}
-					//Little optimization!
-					if(zeros >=2){
-						return;
-					}
-					
-				}
-
-				grids[grid][index] = number;
-				rows[parseInt(grid / 3) * 3 + parseInt(index/3)][grid % 3 * 3 + index%3] = number;
-				columns[grid % 3 * 3 + index%3][parseInt(grid/3) * 3 + parseInt(index/3)] = number;
-
-				newNumber = true;
-				fromTheStart = true;
+				var index = findIndex(cases);
+				fillCaseOne(grid, index, number, "g");
 			}
 
 
@@ -229,6 +134,7 @@
 				var cases = [false, false, false, false, false, false, false, false, false];
 
 				for(var i = 0; i < 9; i++){
+					console.log("Row " + row);
 					if(rows[row][i] != 0){
 						cases[i] = true;
 					}
@@ -267,26 +173,8 @@
 					}
 				}
 
-				var zeros = 0;
-				var index;
-				for(var i = 0; i < 9; i++){
-					if(cases[i] == false){
-						zeros++;
-						index = i;
-					}
-					
-					if(zeros >=2){
-						return;
-					}
-					
-				}
-
-				rows[row][index] = number;
-				columns[index][row] = number;
-				grids[parseInt(row/3)*3 + parseInt(index/3)][row%3*3 + index%3] = number;
-
-				newNumber = true;
-				fromTheStart = true;
+				var index = findIndex(cases);
+				fillCaseOne(row, index, number, "r");
 			}
 
 
@@ -333,26 +221,8 @@
 					}
 				}
 
-				var zeros = 0;
-				var index;
-				for(var i = 0; i < 9; i++){
-					if(cases[i] == false){
-						zeros++;
-						index = i;
-					}
-					
-					if(zeros >=2){
-						return;
-					}
-					
-				}
-				
-				columns[column][index] = number;
-				rows[index][column] = number;
-				grids[parseInt(index/3)*3 + column/3][index%3*3 + column%3] = number;
-
-				newNumber = true;
-				fromTheStart = true;
+				var index = findIndex(cases);
+				fillCaseOne(column, index, number, "c");
 			}
 
 
@@ -378,6 +248,7 @@
 				}
 
 				//First, verification by rows
+				//TODO: How to fusion this with rowVerification?
 				var start = 0;
 				if(grid > 5){
 					start = 6;
@@ -424,34 +295,7 @@
 						}
 					}
 				}
-
-				for(var ind = 0; ind < 9; ind++){
-					var possibilities = 0;
-					var number = 0;
-					for(var numbers = 1; numbers <= 9; numbers++){
-						if(cases[ind][numbers]){
-							possibilities++;
-							number = numbers;
-							cases[ind][numbers] = false;
-						}
-					}
-					if(possibilities == 1 && grids[grid][ind] == 0){
-						console.log("Possibilities: " + possibilities + " Ind: " + ind + " number: " + number)
-						grids[grid][ind] = number;
-						rows[parseInt(grid / 3) * 3 + parseInt(ind/3)][grid % 3 * 3 + ind%3] = number;
-						columns[grid % 3 * 3 + ind%3][parseInt(grid/3) * 3 + parseInt(ind/3)] = number;
-						newNumber = true;
-						fromTheStart = true;
-						//INSERT recursive call?
-					}
-				}			
-
-				//Test
-				for(var i = 0; i < cases.length; i++){
-					for(var j = 0; j< cases[i].length; j++){
-						console.log("Case: "  + i + " " + cases[i][j]);
-					}
-				}
+				inspectPossibilities(cases, grid, "g");
 			}
 
 			function rowMemSearch(row){
@@ -513,26 +357,7 @@
 					}
 				}
 
-				for(var ind = 0; ind < 9; ind++){
-					var possibilities = 0;
-					var number = 0;
-					for(var numbers = 1; numbers <= 9; numbers++){
-						if(cases[ind][numbers]){
-							possibilities++;
-							number = numbers;
-							cases[ind][numbers] = false;
-						}
-					}
-					if(possibilities == 1 && rows[row][ind] == 0){
-						console.log("Possibilities: " + possibilities + " Ind: " + ind + " number: " + number)
-						rows[row][ind] = number;
-						columns[ind][row] = number;
-						grids[parseInt(row/3)*3 + parseInt(ind/3)][row%3*3 + ind%3] = number;
-						newNumber = true;
-						fromTheStart = true;
-						//INSERT recursive call?
-					}
-				}
+				inspectPossibilities(cases, row, "r");
 			}
 
 			function columnMemSearch(column){
@@ -570,9 +395,9 @@
 						for(var i = start; i <= start+6; i+=3){
 							for(var j = 0; j < 9; j++){
 								if(grids[i][j] == number){
-									cases[(i / 3) * 3][number] = false;
-									cases[(i / 3) * 3 +1][number] = false;
-									cases[(i / 3) * 3 +2][number] = false;
+									cases[parseInt(i / 3) * 3][number] = false;
+									cases[parseInt(i / 3) * 3 +1][number] = false;
+									cases[parseInt(i / 3) * 3 +2][number] = false;
 									break;
 								}
 							}
@@ -594,6 +419,95 @@
 					}
 				}
 
+				inspectPossibilities(cases, column, "c");
+			}
+
+			function rowVerification(grid, number, cases){
+				var start = 0;
+				if(grid > 5){
+					start = 6;
+				}
+				else if (grid > 2){
+					start = 3;
+				}
+
+				for(var i = start; i < start+3; i++){
+					for(var j = 0; j < 9; j++){
+						if(rows[i][j] == number){
+							cases[(i % 3) * 3] = true;
+							cases[(i % 3) * 3 +1] = true;
+							cases[(i % 3) * 3 +2] = true;
+							break;
+						}
+					}
+				}
+
+				return cases;
+			}
+
+			function columnVerification(grid, number, cases){
+				var start = 0;
+				if(grid % 3 == 2){
+					start = 6;
+				}
+				else if(grid % 3 == 1){
+					start = 3;
+				}
+
+				for(var i = start; i < start+3; i++){
+					for(var j = 0; j < 9; j++){
+						if(columns[i][j] == number){
+							cases[i % 3] = true;
+							cases[i % 3 +3] = true;
+							cases[i % 3 +6] = true;
+							break;
+						}
+					}
+				}
+
+				return cases;
+			}
+
+			function findIndex(cases){
+				var zeros = 0;
+				var index = -1;
+				for(var i = 0; i < 9; i++){
+					if(cases[i] == false){
+						zeros++;
+						index = i;
+					}
+					//Little optimization!
+					if(zeros >=2){
+						return -1;
+					}
+					
+				}
+				return index;
+			}
+
+			function fillCaseOne(grc, index, number, type){
+				if(index != -1){
+					if(type == "g"){
+						grids[grc][index] = number;
+						rows[parseInt(grc / 3) * 3 + parseInt(index/3)][grc % 3 * 3 + index%3] = number;
+						columns[grc % 3 * 3 + index%3][parseInt(grc/3) * 3 + parseInt(index/3)] = number;
+					}
+					else if(type == "r"){
+						rows[grc][index] = number;
+						columns[index][grc] = number;
+						grids[parseInt(grc/3)*3 + parseInt(index/3)][grc%3*3 + index%3] = number;
+					}
+					else if(type == "c"){
+						columns[grc][index] = number;
+						rows[index][grc] = number;
+						grids[parseInt(index/3)*3 + parseInt(grc/3)][index%3*3 + grc%3] = number;
+					}
+					newNumber = true;
+					fromTheStart = true;
+				}
+			}
+
+			function inspectPossibilities(cases, grc, type){
 				for(var ind = 0; ind < 9; ind++){
 					var possibilities = 0;
 					var number = 0;
@@ -604,17 +518,11 @@
 							cases[ind][numbers] = false;
 						}
 					}
-					if(possibilities == 1 && rows[row][ind] == 0){
-						console.log("Possibilities: " + possibilities + " Ind: " + ind + " number: " + number)
-						columns[column][index] = number;
-						rows[index][column] = number;
-						grids[parseInt(index/3)*3 + column/3][index%3*3 + column%3] = number;
-						newNumber = true;
-						fromTheStart = true;
-						//INSERT recursive call?
+					if(possibilities == 1 && ((type == "r" && rows[grc][ind] == 0) || (type == "g" && grids[grc][ind] == 0) || (type == "c" && columns[grc][ind] == 0))){
+						fillCaseOne(grc, ind, number, type);
 					}
 				}
-			}			
+			}
 		</script>
 	</body>
 </html>
