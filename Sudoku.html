@@ -49,62 +49,34 @@
 				//Verification by grid
 				while(fromTheStart){
 					fromTheStart = false;
+					newNumber = true;
 					while(newNumber){
 						newNumber = false;
 						for(var grid = 0; grid < 9; grid++){
 							for(var i = 1; i <= 9; i++){
-								var found = false;
+								var foundG = false;
+								var foundR = false;
+								var foundC = false;
 								for(var j = 0; j < 9; j++){
 									//Verifying if the current case is between 1 and 9 (so is discovered)
 									if(grids[grid][j] == i){
-										found = true;
-										break;
+										foundG = true;
+									}
+									if(rows[grid][j] == i){
+										foundR = true;
+									}
+									if(columns[grid][j] == i){
+										foundC = true;
 									}
 								}
-								if(!found){
+								if(!foundG){
 									gridSearch(grid,i);
 								}
-							}
-						}
-					}
-
-					newNumber = true;
-
-					//Verification by row
-					while(newNumber){
-						newNumber = false;
-						for(var row = 0; row < 9; row++){
-							for(var i = 1; i <= 9; i++){
-								var found = false;
-								for(var j = 0; j < 9; j++){
-									//Verifying if the current case is between 1 and 9 (so is discovered)
-									if(rows[row][j] == i){
-										found = true;
-										break;
-									}
+								if(!foundR && !newNumber){
+									rowSearch(grid,i);
 								}
-								if(!found){
-									rowSearch(row,i);
-								}
-							}
-						}
-					}
-
-					//Verification by column
-					while(newNumber){
-						newNumber = false;
-						for(var column = 0; column < 9; column++){
-							for(var i = 1; i <= 9; i++){
-								var found = false;
-								for(var j = 0; j < 9; j++){
-									//Verifying if the current case is between 1 and 9 (so is discovered)
-									if(columns[column][j] == i){
-										found = true;
-										break;
-									}
-								}
-								if(!found){
-									columnSearch(column,i);
+								if(!foundC && !newNumber){
+									columnSearch(grid,i);
 								}
 							}
 						}
